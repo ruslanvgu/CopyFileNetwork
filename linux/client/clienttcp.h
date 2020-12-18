@@ -17,9 +17,11 @@ g++ -std=c++17 clienttcp.h clienttcp.cpp
 #include <cstring>
 #include <thread>
 #include <chrono>
+#include <fstream>
 
 using std::cout;
 using std::endl;
+using std::uint8_t;
 
 class clienttcp
 {
@@ -29,7 +31,8 @@ class clienttcp
 	public:
         clienttcp(char* host, int port);
 		~clienttcp();
-        int sendMsg(const char* msg,const size_t sizepackage);	
+        int sendMsg(const char* msg, const size_t sizepackage);	
+        int sendFile(const char* pathFile);
 };
 
 #endif

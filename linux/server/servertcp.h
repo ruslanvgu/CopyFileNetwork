@@ -25,6 +25,8 @@ g++ -std=c++17 -lpthread servertcp.h servertcp.cpp
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <fstream>
+#include <cstring>
 
 using std::cout;
 using std::endl;
@@ -61,7 +63,7 @@ class servertcp
 		int sock, sockNew;
 		struct sockaddr_in addr;
 		std::vector<ClientData> arrayClient;
-        void newSession(const int sock, const size_t sizepackage);
+        void newSession(const int sock);
 		void removeClient(const ClientData &client); 
         void printToConsole(const std::string  &text);
 		

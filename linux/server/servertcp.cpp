@@ -2,56 +2,56 @@
 
 servertcp::servertcp(char* host, int port)
 {
-	cout << "server" << endl;
-	
-	//create socket 
-	sock = socket(AF_INET, SOCK_STREAM, 0);  
-	if(sock < 0)
-	{
-		perror("error create socket");
-		exit(1);
-	}
-	
-	//init stuct  address
-	addr.sin_family = AF_INET;				
-	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = inet_addr(host);
-	
-	//communicate socket and address
-	if(bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) 
-	{
-		perror("error bind");
-		exit(2);	
-	}
-	
-	//create queue querys
-	if(listen(sock, 5) < 0) 
-	{
-		perror("error listen");
-		exit(3);
-	}
-	
-	cout << "Listen interface " << host <<" on port "<< port << endl;
+    cout << "server" << endl;
 
-	while(1)
-	{
-		struct sockaddr_in addrNew;
-		unsigned int lengthAddrNew = sizeof(addrNew);
-		sockNew = accept(sock, (struct sockaddr*)&addrNew, &lengthAddrNew);
-		if(sockNew >= 0)
-		{
-			ClientData client(inet_ntoa(addrNew.sin_addr), addrNew.sin_port, sockNew);
-			client.printData();
-			arrayClient.push_back(client);
+    //create socket
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(sock < 0)
+    {
+        perror("error create socket");
+        exit(1);
+    }
 
-			std::thread th(&servertcp::newSession, this, sockNew, 2);//заменить auto myFuture = std::async(std::launch::async, myFunction)
-			th.detach();
-		} 
-		else 
-		{
-			perror("error accept");
-		}
-	}
+    //init stuct  address
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = inet_addr(host);
+
+    //communicate socket and address
+    if(bind(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    {
+        perror("error bind");
+        exit(2);
+    }
+
+    //create queue querys
+    if(listen(sock, 5) < 0)
+    {
+        perror("error listen");
+        exit(3);
+    }
+
+    cout << "Listen interface " << host <<" on port "<< port << endl;
+
+    while(1)
+    {
+        struct sockaddr_in addrNew;
+        unsigned int lengthAddrNew = sizeof(addrNew);
+        sockNew = accept(sock, (struct sockaddr*)&addrNew, &lengthAddrNew);
+        if(sockNew >= 0)
+        {
+            ClientData client(inet_ntoa(addrNew.sin_addr), addrNew.sin_port, sockNew);
+            client.printData();
+            arrayClient.push_back(client);
+
+            std::thread th(&servertcp::newSession, this, sockNew);//заменить auto myFuture = std::async(std::launch::async, myFunction)
+            th.detach();
+        }
+        else
+        {
+            perror("error accept");
+        }
+    }
 }
 
 servertcp::~servertcp()
@@ -59,31 +59,44 @@ servertcp::~servertcp()
 
 }
 
-void servertcp::newSession(const int sock, const size_t sizepackage)
+void servertcp::newSession(const int sock)
 {
-    //geting data
     cout << "thread №" <<  std::this_thread::get_id() << endl;
-    int bytesRead = 0;
-    char buf[sizepackage] = {0};
-    std::string data;
-    while((bytesRead = recv(sock, buf, sizepackage, 0)) > 0)
+    uint8_t sizePackage;
+    std::string  data;
+    while((read(sock, &sizePackage, 1)) > 0)
     {
-    	std::string package(buf, sizepackage); 
-        data +=  package;
+        //read first byte package
+        uint8_t dataPackage[sizePackage]={0};
+        cout << sizeof(dataPackage) << endl;
+        int bytesData;
+        bytesData = read(sock, dataPackage+1, sizePackage);
+        if(bytesData < 0)
+        {
+            perror("error read package ");
+            break;
+        }
+        std::string stringPackage(reinterpret_cast<char*>(dataPackage),sizePackage);
+        data+=stringPackage;
     }
+    close(sock);
 
-    //processing
-    printToConsole(data);
+    // char* data =  reinterpret_cast<char*>(dataFile);
+
+    cout << data <<endl;
+    std::ofstream  file;
+    file.open ("/home/sintez/tmp/test.txt");
+    file << data;
+    file.close();
 
     //close socket
-    close(sock);
 }
 
 void servertcp::removeClient(const ClientData &client)
 {
-	int x = 0;
-	for(const auto& i : arrayClient)
-		if(i.sock == client.sock)
+    int x = 0;
+    for(const auto& i : arrayClient)
+        if(i.sock == client.sock)
             arrayClient.erase(arrayClient.begin() + x++);
 }
 
