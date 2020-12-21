@@ -64,32 +64,30 @@ void servertcp::newSession(const int sock)
     cout << "thread №" <<  std::this_thread::get_id() << endl;
     uint8_t sizePackage;
     std::string  data;
+
     while((read(sock, &sizePackage, 1)) > 0)
     {
+
         //read first byte package
         uint8_t dataPackage[sizePackage]={0};
-        cout << sizeof(dataPackage) << endl;
         int bytesData;
-        bytesData = read(sock, dataPackage+1, sizePackage);
+        bytesData = read(sock, dataPackage, sizePackage);
         if(bytesData < 0)
         {
             perror("error read package ");
-            break;
+            return;
         }
+
         std::string stringPackage(reinterpret_cast<char*>(dataPackage),sizePackage);
         data+=stringPackage;
     }
     close(sock);
 
-    // char* data =  reinterpret_cast<char*>(dataFile);
-
-    cout << data <<endl;
     std::ofstream  file;
-    file.open ("/home/sintez/tmp/test.txt");
+    file.open ("/home/sintez/tmp/test.pdf");
     file << data;
     file.close();
 
-    //close socket
 }
 
 void servertcp::removeClient(const ClientData &client)

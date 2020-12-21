@@ -114,8 +114,7 @@ int clienttcp::sendFile(const char* pathFile)
 			{
 				data[j + 1] = buff[j + shift];	
 			}
-
-			resultSend = write(sock, data, maxSize);
+			resultSend = write(sock, data, sizeof(data));
 			cout << resultSend << data << endl;
 			if (resultSend < 0)
 		 		perror("error send package " + i);
@@ -136,19 +135,6 @@ int clienttcp::sendFile(const char* pathFile)
 		 		perror("error send package ");
 		}
 	}
-	// size_t remains = (sizeFile > sizepackage) ? sizepackage - (sizeFile % sizepackage) : sizepackage - sizeFile;
-	// char data[sizeFile + remains] = {0};
-	// memcpy(data, buff, sizeFile);
-	// size_t countsend = sizeof(data) / sizepackage;
-
-	// int i = 0;
-	// while(i < countsend)
-	// {
- //    	int resultSend = send(sock, data + (i * sizepackage), sizepackage, 0);
-	// 	if (resultSend < 0)
-	// 		perror("error send message");
-	// 	i++;
-	// }
 	
 	return 0;
 }

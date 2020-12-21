@@ -10,13 +10,7 @@ int main(int argc, char* argv[] )
     }
 
 	clienttcp app(argv[1], atoi(argv[2]));
-	//int i =0;
-	
-//	app.sendMsg(argv[3],2);
-	//	app.sendMsg("hello",2);
-		//std::this_thread::sleep_for (std::chrono::seconds(1));
-	app.sendFile("/home/sintez/tmp/1.txt");
-
+	app.sendFile("/home/sintez/tmp/bash.pdf");
 
 	return 0;
 }
